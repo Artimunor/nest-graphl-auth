@@ -14,10 +14,10 @@ export class LocalAuthGuard extends AuthGuard('local') {
     return ctx.getContext().req;
   }
 
-  async canActivate(context: ExecutionContext): Promise<any> {
-    const ctx = GqlExecutionContext.create(context);
-    return this.auth.validateUser(ctx.getArgs().email, ctx.getArgs().password);
-  }
+  // async canActivate(context: ExecutionContext): Promise<any> {
+  //   const ctx = GqlExecutionContext.create(context);
+  //   return this.auth.validateUser(ctx.getArgs().email, ctx.getArgs().password);
+  // }
 }
 
 @Injectable()

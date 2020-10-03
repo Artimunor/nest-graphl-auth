@@ -82,6 +82,10 @@ export class UserService {
     return User.findOne({ email: email });
   }
 
+  public async findById(id: number): Promise<User | undefined> {
+    return User.findOne(id);
+  }
+
   public async userCreate(email: string, password: string): Promise<User> {
     return await User.create({
       email: email,

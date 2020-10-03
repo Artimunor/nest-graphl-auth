@@ -10,6 +10,33 @@
 $ npm install
 ```
 
+## Configuration
+
+Create a `.env` file with the following content:
+
+```
+JWT_SECRET=x
+SERVER_HOST=localhost
+SERVER_PORT=3000
+FRONTEND_HOST=http://localhost
+FRONTEND_PORT=3050
+TYPEORM_CONNECTION=
+TYPEORM_HOST=localhost
+TYPEORM_USERNAME=admin
+TYPEORM_PASSWORD=admin
+TYPEORM_DATABASE=auth
+TYPEORM_PORT=5432
+TYPEORM_SYNCHRONIZE=true
+TYPEORM_LOGGING=true
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_SECRET=x
+EMAIL_ACTIVATED=false
+EMAIL_TRANSPORT=x
+EMAIL_FROM=x
+EMAIL_SENDER_NAME=x
+```
+
 ## Running the app
 
 ```bash
@@ -23,23 +50,10 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
 ## Stay in touch
 
 - Author - [Daniel de Witte](https://dewitte.info)
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+[MIT licensed](LICENSE).

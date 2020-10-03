@@ -1,28 +1,23 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Context,
-  Info,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Info } from '@nestjs/graphql';
 import { GraphQLResolveInfo } from 'graphql';
 import { User } from './user.entity';
 import { UserInput } from './user.input';
 import { UserService } from './user.service';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/auth.guard';
+import { CurrentUser } from '../../shared/decorators/decorators';
 
+@UseGuards(GqlAuthGuard)
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userRepository: UserService) {}
 
-  @UseGuards(GqlAuthGuard)
   @Query(() => User)
-  async user(@Context('currentUser') currentUser: User): Promise<User> {
-    return currentUser;
+  async user(@CurrentUser() user: User): Promise<User> {
+    Logger.log(user);
+    return user;
   }
 
   @Query(() => [User])
@@ -48,7 +43,6 @@ export class UserResolver {
     );
   }
 
-  // only allow if user is logged in and then add path to picture to User.profilePicturePath
   @Mutation(() => Boolean)
   async userAddProfilePicture(
     @Args('picture', { type: () => GraphQLUpload })

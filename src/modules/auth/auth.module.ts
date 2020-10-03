@@ -7,7 +7,7 @@ import { RedisModule } from '../redis/redis.module';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { LocalStrategy } from './strategy/local.strategy';
+import { GqlAuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -16,10 +16,10 @@ import { LocalStrategy } from './strategy/local.strategy';
     PassportModule.register({ session: true }),
     MailerModule,
     JwtModule.register({
-      secret: 'x',
+      secret: 'x', //configService.get('JWT_SECRET'),
     }),
   ],
-  providers: [AuthResolver, AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthResolver, AuthService, GqlAuthGuard, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
