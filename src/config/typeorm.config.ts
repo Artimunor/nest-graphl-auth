@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { join } from 'path';
 
 @Injectable()
-export class TypeOrmService implements TypeOrmOptionsFactory {
+export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   async createTypeOrmOptions(): Promise<TypeOrmModuleOptions> {
@@ -15,7 +14,7 @@ export class TypeOrmService implements TypeOrmOptionsFactory {
       username: this.configService.get('TYPEORM_USERNAME'),
       password: this.configService.get('TYPEORM_PASSWORD'),
       database: this.configService.get('TYPEORM_DATABASE'),
-      entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+      entities: ['dist/**/*.entity{.ts,.js}'],
       synchronize: this.configService.get('TYPEORM_SYNCHRONIZE'),
       logging: this.configService.get('TYPEORM_LOGGING'),
     } as TypeOrmModuleOptions;

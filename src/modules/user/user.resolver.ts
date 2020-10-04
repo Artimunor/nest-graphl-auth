@@ -6,8 +6,9 @@ import { UserService } from './user.service';
 import { GraphQLUpload, FileUpload } from 'graphql-upload';
 import { createWriteStream } from 'fs';
 import { Logger, UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/guards/auth.guard';
-import { CurrentUser } from '../../shared/decorators/decorators';
+import { GqlAuthGuard } from '../auth/guards/gql.auth.guard';
+import { CurrentUser } from '../../shared/decorators/context.decorators';
+import { Roles } from '../../shared/decorators/roles.decorators';
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => User)
@@ -16,10 +17,10 @@ export class UserResolver {
 
   @Query(() => User)
   async user(@CurrentUser() user: User): Promise<User> {
-    Logger.log(user);
     return user;
   }
 
+  @Roles('admin')
   @Query(() => [User])
   async userFind(
     @Args('id', { nullable: true }) id: number,
@@ -64,10 +65,10 @@ export class UserResolver {
 
   @Mutation(() => User, { nullable: true })
   async userUpdate(
-    @Args('id') id: number,
+    @CurrentUser() user: User,
     @Args('data') ui: UserInput,
   ): Promise<User | null> {
-    return this.userService.userUpdate(id, ui);
+    return this.userService.userUpdate(user.id, ui);
   }
 
   @Mutation(() => Boolean)

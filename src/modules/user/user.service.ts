@@ -105,17 +105,12 @@ export class UserService {
       return null;
     }
 
-    // if (ui.entityKey) {
-    //   const wpEntity = await WPEntity.findOne({ key: ui.entityKey });
-    //   if (wpEntity) {
-    //     user.userEntity = wpEntity;
-    //   } else {
-    //     return null;
-    //   }
-    // }
-
     if (ui.firstName) {
       user.firstName = ui.firstName;
+    }
+
+    if (ui.middleName) {
+      user.middleName = ui.middleName;
     }
 
     if (ui.lastName) {
@@ -126,8 +121,14 @@ export class UserService {
       user.email = ui.email;
     }
 
+    if (ui.phoneNumber) {
+      user.phoneNumber = ui.phoneNumber;
+    }
+
     return user.save();
   }
+
+  public async userSetProfilePicturePath(profilePicturePath: string) {}
 
   public async userConfirm(id: number): Promise<boolean> {
     const user = await User.findOne(id);

@@ -11,6 +11,8 @@ import { JwtInput } from './input/jwt.input';
 import { ConfigService } from '@nestjs/config';
 import { v4 } from 'uuid';
 import { AuthHelper } from './auth.helper';
+import { User } from '../user/user.entity';
+import { createFalse } from 'typescript';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +22,7 @@ export class AuthService {
 
   private confirmUserPrefix = 'user-confirmation';
   private forgotPasswordPrefix = 'forgot-password';
+  private jwtBlacklistPrefix = 'jwt-blacklist';
 
   constructor(
     private userService: UserService,
@@ -103,6 +106,26 @@ export class AuthService {
     };
   }
 
+  public async userLogout(user: User, token: string): Promise<boolean> {
+    Logger.log('token: ' + token + ' user: ' + user.email);
+
+    await this.redisService.set(
+      this.jwtBlacklistPrefix + ':' + token,
+      user.id,
+      'ex',
+      this.configService.get('JWT_EXPIRE'),
+    );
+
+    return true;
+  }
+
+  public async isJwtBlacklisted(token: string): Promise<boolean> {
+    const userId = await this.redisService.get(
+      this.jwtBlacklistPrefix + ':' + token,
+    );
+    return userId ? true : false;
+  }
+
   public async userConfirm(token: string): Promise<boolean> {
     const userId = await this.redisService.get(
       this.confirmUserPrefix + ':' + token,
@@ -148,7 +171,7 @@ export class AuthService {
     return this.userService.findById(userId);
   }
 
-  validateToken(token: string): boolean {
+  public validateToken(token: string): boolean {
     Logger.log('token: ' + token, 'AuthService.validateToken');
     try {
       this.jwt.verify(token);
@@ -158,14 +181,9 @@ export class AuthService {
     }
   }
 
-  // async logout(ctx: GqlContext) {
-  //   await ctx.req.session.destroy(err => {
-  //     console.log(err);
-  //     return false;
-  //   });
-  //   await ctx.res.clearCookie('votingapp');
-  //   return true;
-  // }
+  public matchRoles(roles: string[], user: User) {
+    return true;
+  }
 
   private signToken(id: number) {
     const payload: JwtInput = { userId: id };

@@ -1,15 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
 import { GraphQLModule } from '@nestjs/graphql';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { join } from 'path';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { ConfigService } from '@nestjs/config';
-import { GraphqlOptions } from './config/graphql.options';
+import { GraphqlConfigService } from './config/graphql.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TypeOrmConfigService } from './config/typeorm.config';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { GqlAuthGuard } from './modules/auth/guards/gql.auth.guard';
+import { MailerConfigService } from './config/mailer.config';
 
 @Module({
   imports: [
@@ -18,44 +23,20 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     AuthModule,
     RedisModule,
     GraphQLModule.forRootAsync({
-      useClass: GraphqlOptions,
+      useClass: GraphqlConfigService,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        return {
-          type: configService.get('TYPEORM_CONNECTION'),
-          host: configService.get('TYPEORM_HOST', 'localhost'),
-          port: configService.get<number>('TYPEORM_PORT', 5432),
-          username: configService.get('TYPEORM_USERNAME'),
-          password: configService.get('TYPEORM_PASSWORD'),
-          database: configService.get('TYPEORM_DATABASE'),
-          entities: [join(__dirname, '**', '*.entity.{ts,js}')],
-          synchronize: configService.get('TYPEORM_SYNCHRONIZE'),
-          logging: configService.get('TYPEORM_LOGGING'),
-        } as TypeOrmModuleOptions;
-      },
-      inject: [ConfigService],
+      useClass: TypeOrmConfigService,
     }),
     MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        transport: configService.get('EMAIL_TRANSPORT'),
-        defaults: {
-          from: `${configService.get('EMAIL_SENDER')} <${configService.get(
-            'EMAIL_FROM',
-          )}>`,
-        },
-        template: {
-          dir: __dirname + '/templates',
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
-        },
-      }),
-      inject: [ConfigService],
+      useClass: MailerConfigService,
     }),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

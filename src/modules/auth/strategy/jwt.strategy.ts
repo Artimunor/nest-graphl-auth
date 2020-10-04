@@ -4,22 +4,28 @@ import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
 import { JwtInput } from '../input/jwt.input';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'x', //configService.get('JWT_SECRET'),
+      secretOrKey: configService.get('JWT_SECRET'),
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: JwtInput) {
+  async validate(request: Request, payload: JwtInput) {
+    const token = request.headers.authorization.split(' ')[1];
+    const blacklisted = await this.authService.isJwtBlacklisted(token);
+    if (blacklisted) {
+      throw new UnauthorizedException();
+    }
     const user = await this.authService.validateUser(payload.userId);
-
     if (!user) {
       throw new UnauthorizedException();
     }

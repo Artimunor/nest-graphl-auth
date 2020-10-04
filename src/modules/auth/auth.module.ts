@@ -7,7 +7,8 @@ import { RedisModule } from '../redis/redis.module';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { GqlAuthGuard } from './guards/auth.guard';
+import { GqlAuthGuard } from './guards/gql.auth.guard';
+import { JwtConfigService } from '../../config/jwt.config';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { GqlAuthGuard } from './guards/auth.guard';
     RedisModule,
     PassportModule.register({ session: true }),
     MailerModule,
-    JwtModule.register({
-      secret: 'x', //configService.get('JWT_SECRET'),
+    JwtModule.registerAsync({
+      useClass: JwtConfigService,
     }),
   ],
   providers: [AuthResolver, AuthService, GqlAuthGuard, JwtStrategy],
