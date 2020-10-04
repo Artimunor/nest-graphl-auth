@@ -5,8 +5,6 @@ import {
   Column,
   BaseEntity,
   Unique,
-  OneToOne,
-  JoinColumn,
 } from 'typeorm';
 
 @ObjectType()
@@ -40,15 +38,6 @@ export class User extends BaseEntity {
   @Field({ nullable: true })
   @Column({ nullable: true })
   profilePicturePath: string;
-
-  // @Field(() => WPEntity, { nullable: true })
-  // @OneToOne(
-  //   () => WPEntity,
-  //   wpEntity => wpEntity.user,
-  //   { eager: true },
-  // )
-  // @JoinColumn()
-  // userEntity: WPEntity;
 
   @Field()
   name(@Root() parent: User): string {

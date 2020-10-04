@@ -1,8 +1,5 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { RegisterInput } from './input/register.input';
-import { UseGuards } from '@nestjs/common';
-import { User } from '../user/user.entity';
-import { LocalAuthGuard } from './guards/auth.guard';
 import { AuthService } from './auth.service';
 import { AccessToken } from './output/access-token';
 import { LoginInput } from './input/login.input';
@@ -11,7 +8,7 @@ import { LoginInput } from './input/login.input';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation(() => User)
+  @Mutation(() => AccessToken)
   async userRegister(
     @Args({ name: 'registerInput', type: () => RegisterInput })
     registerInput: RegisterInput,
@@ -25,7 +22,6 @@ export class AuthResolver {
   }
 
   @Mutation(() => AccessToken)
-  //@UseGuards(LocalAuthGuard)
   async userLogin(
     @Args({ name: 'loginInput', type: () => LoginInput })
     loginInput: LoginInput,

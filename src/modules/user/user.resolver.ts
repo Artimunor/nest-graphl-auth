@@ -12,7 +12,7 @@ import { CurrentUser } from '../../shared/decorators/decorators';
 @UseGuards(GqlAuthGuard)
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userRepository: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @Query(() => User)
   async user(@CurrentUser() user: User): Promise<User> {
@@ -31,7 +31,7 @@ export class UserResolver {
     @Args('active', { nullable: true }) active: boolean,
     @Info() info: GraphQLResolveInfo,
   ): Promise<User[]> {
-    return this.userRepository.userFind(
+    return this.userService.userFind(
       info,
       id,
       firstName,
@@ -45,15 +45,21 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async userAddProfilePicture(
+    @CurrentUser() user: User,
     @Args('picture', { type: () => GraphQLUpload })
     { createReadStream, filename }: FileUpload,
   ): Promise<boolean> {
-    return new Promise(async (resolve, reject) =>
+    const writeResult: Promise<boolean> = new Promise(async (resolve, reject) =>
       createReadStream()
         .pipe(createWriteStream(__dirname + `/images/${filename}`))
         .on('finish', () => resolve(true))
         .on('error', () => reject(false)),
     );
+
+    this.userService.userUpdate(user.id, {
+      profilePicturePath: `/images/${filename}`,
+    });
+    return writeResult;
   }
 
   @Mutation(() => User, { nullable: true })
@@ -61,11 +67,11 @@ export class UserResolver {
     @Args('id') id: number,
     @Args('data') ui: UserInput,
   ): Promise<User | null> {
-    return this.userRepository.userUpdate(id, ui);
+    return this.userService.userUpdate(id, ui);
   }
 
   @Mutation(() => Boolean)
   async userDelete(@Args('id') id: number): Promise<boolean> {
-    return this.userRepository.userDelete(id);
+    return this.userService.userDelete(id);
   }
 }

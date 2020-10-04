@@ -16,6 +16,7 @@ import { AuthHelper } from './auth.helper';
 export class AuthService {
   private frontendHost: string;
   private frontendPort: number;
+  private emailActivated: boolean;
 
   private confirmUserPrefix = 'user-confirmation';
   private forgotPasswordPrefix = 'forgot-password';
@@ -35,6 +36,10 @@ export class AuthService {
       this.configService.get('FRONTEND_PORT') == undefined
         ? 3000
         : parseInt(this.configService.get('FRONTEND_PORT') as string);
+    this.emailActivated =
+      this.configService.get('EMAIL_ACTIVATED') == undefined
+        ? false
+        : (this.configService.get('EMAIL_ACTIVATED') as boolean);
   }
 
   public async userRegister(
@@ -52,20 +57,24 @@ export class AuthService {
       hashedPassword,
     );
 
-    const url = await this.createTokenUrl(
-      userCreated.id,
-      this.confirmUserPrefix,
-      'confirm',
-    );
+    if (this.emailActivated) {
+      const url = await this.createTokenUrl(
+        userCreated.id,
+        this.confirmUserPrefix,
+        'confirm',
+      );
 
-    this.mailerService.sendMail({
-      to: userCreated.email,
-      subject: 'Confirm your Account ✔',
-      template: 'account.confirmation.hbs',
-      context: {
-        url: url,
-      },
-    });
+      this.mailerService.sendMail({
+        to: userCreated.email,
+        subject: 'Confirm your Account ✔',
+        template: 'account.confirmation.hbs',
+        context: {
+          url: url,
+        },
+      });
+    } else {
+      await this.userService.userConfirm(userCreated.id);
+    }
 
     return {
       token: this.signToken(userCreated.id),
@@ -115,39 +124,25 @@ export class AuthService {
       return true;
     }
 
-    const url = await this.createTokenUrl(
-      user.id,
-      this.forgotPasswordPrefix,
-      'account/change-password',
-    );
+    if (this.emailActivated) {
+      const url = await this.createTokenUrl(
+        user.id,
+        this.forgotPasswordPrefix,
+        'account/change-password',
+      );
 
-    this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Reset the password of your account',
-      template: 'account.resetpassword.hbs',
-      context: {
-        url: url,
-      },
-    });
+      this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Reset the password of your account',
+        template: 'account.resetpassword.hbs',
+        context: {
+          url: url,
+        },
+      });
+    }
 
     return true;
   }
-
-  // async validateUser(email: string, password: string): Promise<any> {
-  //   Logger.log(
-  //     'email: ' + email + ' password: ' + password,
-  //     'AuthService.validateUser',
-  //   );
-  //   const user = await this.userService.findByEmail(email);
-
-  //   const valid = await bcrypt.compare(password, user.password);
-  //   if (user && valid) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-
-  //   return false;
-  // }
 
   public async validateUser(userId: number) {
     return this.userService.findById(userId);
