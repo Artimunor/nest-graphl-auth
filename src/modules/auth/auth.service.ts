@@ -186,8 +186,7 @@ export class AuthService {
     }) as JwtInput;
 
     const user = await this.userService.findById(decoded.userId);
-    if (!user.role.name) {
-      console.log('no role name');
+    if (!user || !user.role || !user.role.name) {
       return false;
     }
 

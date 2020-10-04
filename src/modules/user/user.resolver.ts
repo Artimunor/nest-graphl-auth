@@ -84,7 +84,7 @@ export class UserResolver {
     return await this.userService.userGrantRole(id, roleName);
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => User)
   async userRevokeRole(@Args('id') id: number): Promise<User> {
     return this.userService.userRevokeRole(id);
   }
