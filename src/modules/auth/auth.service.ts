@@ -12,7 +12,6 @@ import { ConfigService } from '@nestjs/config';
 import { v4 } from 'uuid';
 import { AuthHelper } from './auth.helper';
 import { User } from '../user/user.entity';
-import { createFalse } from 'typescript';
 
 @Injectable()
 export class AuthService {
@@ -181,8 +180,22 @@ export class AuthService {
     }
   }
 
-  public matchRoles(roles: string[], user: User) {
-    return true;
+  public async matchRoles(roles: string[], token: string): Promise<boolean> {
+    const decoded = this.jwt.decode(token, {
+      json: false,
+    }) as JwtInput;
+
+    const user = await this.userService.findById(decoded.userId);
+    if (!user.role.name) {
+      console.log('no role name');
+      return false;
+    }
+
+    if (roles.includes(user.role.name)) {
+      return true;
+    }
+
+    return false;
   }
 
   private signToken(id: number) {

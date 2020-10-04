@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { GraphQLResolveInfo } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { Role } from './role.entity';
+import { RoleInput } from './role.input';
 
 @Injectable()
 export class RoleService {
@@ -37,5 +38,34 @@ export class RoleService {
     } else {
       throw new Error('Unable to parse graphql info object');
     }
+  }
+
+  public async roleCreate(ri: RoleInput): Promise<Role> {
+    return await Role.create({
+      name: ri.name,
+      description: ri.description,
+    }).save();
+  }
+
+  public async roleDelete(id: number): Promise<boolean> {
+    const res = await Role.delete(id);
+    return res.affected == null ? false : res.affected > 0;
+  }
+
+  public async roleUpdate(id: number, ri: RoleInput): Promise<Role> {
+    const role = await Role.findOne(id);
+    if (!role) {
+      return null;
+    }
+
+    if (ri.name) {
+      role.name = ri.name;
+    }
+
+    if (ri.description) {
+      role.description = ri.description;
+    }
+
+    return role.save();
   }
 }

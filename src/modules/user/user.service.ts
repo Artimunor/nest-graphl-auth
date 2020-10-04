@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GraphQLResolveInfo } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
+import { Role } from '../role/role.entity';
 import { User } from './user.entity';
 import { UserInput } from './user.input';
 
@@ -140,5 +141,32 @@ export class UserService {
     await user.save();
 
     return true;
+  }
+
+  public async userGrantRole(id: number, roleName: string): Promise<User> {
+    const user = await User.findOne(id);
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    const role = await Role.findOne({ name: roleName });
+    if (!role) {
+      throw new Error('Role with name [' + roleName + '] does not exist');
+    }
+
+    user.role = role;
+
+    return user.save();
+  }
+
+  public async userRevokeRole(id: number): Promise<User> {
+    const user = await User.findOne(id);
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+
+    user.role = null;
+
+    return user.save();
   }
 }

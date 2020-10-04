@@ -1,5 +1,13 @@
 import { Field, ID, ObjectType, Root } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BaseEntity,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
+import { Role } from '../role/role.entity';
 
 @ObjectType()
 @Entity()
@@ -40,4 +48,8 @@ export class User extends BaseEntity {
   @Field()
   @Column('bool', { default: true })
   active: boolean;
+
+  @Field({ nullable: true })
+  @ManyToOne(() => Role, { nullable: true, eager: true })
+  role: Role;
 }
