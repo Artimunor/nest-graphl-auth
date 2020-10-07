@@ -25,7 +25,7 @@ export class RoleResolver {
 
   @Roles('admin')
   @Mutation(() => Role)
-  rolenCreate(@Args('data') ri: RoleInput): Promise<Role> {
+  roleCreate(@Args('data') ri: RoleInput): Promise<Role> {
     return this.roleService.roleCreate(ri);
   }
 
