@@ -1,22 +1,22 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { RegisterInput } from './input/register.input';
 import { AuthService } from './auth.service';
-import { AccessToken } from './output/access-token';
 import { LoginInput } from './input/login.input';
 import { User } from '../user/user.entity';
 import { CurrentUser, Jwt } from '../../shared/decorators/context.decorators';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from './guards/gql.auth.guard';
+import { UserDTO } from './output/user.dto';
 
 @Resolver('Authentication')
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation(() => AccessToken)
+  @Mutation(() => UserDTO)
   async userRegister(
     @Args({ name: 'registerInput', type: () => RegisterInput })
     registerInput: RegisterInput,
-  ): Promise<AccessToken> {
+  ): Promise<UserDTO> {
     return this.authService.userRegister(registerInput);
   }
 
@@ -25,11 +25,11 @@ export class AuthResolver {
     return this.authService.userConfirm(token);
   }
 
-  @Mutation(() => AccessToken)
+  @Mutation(() => UserDTO)
   async userLogin(
     @Args({ name: 'loginInput', type: () => LoginInput })
     loginInput: LoginInput,
-  ): Promise<AccessToken> {
+  ): Promise<UserDTO> {
     return this.authService.userLogin(loginInput);
   }
 

@@ -90,9 +90,12 @@ export class UserService {
   public async userCreate(email: string, password: string): Promise<User> {
     return await User.create({
       email: email,
-      //userEntity: ui.userEntity,
       password: password,
     }).save();
+  }
+
+  public async userCreateOrUpdate(user: User): Promise<User> {
+    return await user.save();
   }
 
   public async userDelete(id: number): Promise<boolean> {
@@ -128,8 +131,6 @@ export class UserService {
 
     return user.save();
   }
-
-  public async userSetProfilePicturePath(profilePicturePath: string) {}
 
   public async userConfirm(id: number): Promise<boolean> {
     const user = await User.findOne(id);

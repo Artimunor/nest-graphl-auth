@@ -2,7 +2,6 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthenticationError } from 'apollo-server-express';
-import { AccessToken } from './output/access-token';
 import { LoginInput } from './input/login.input';
 import { RegisterInput } from './input/register.input';
 import { RedisService } from '../redis/redis.service';
@@ -12,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { v4 } from 'uuid';
 import { AuthHelper } from './auth.helper';
 import { User } from '../user/user.entity';
+import { UserDTO } from './output/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -44,9 +44,7 @@ export class AuthService {
         : (this.configService.get('EMAIL_ACTIVATED') as boolean);
   }
 
-  public async userRegister(
-    registerInput: RegisterInput,
-  ): Promise<AccessToken> {
+  public async userRegister(registerInput: RegisterInput): Promise<UserDTO> {
     const userExists = await this.userService.findByEmail(registerInput.email);
     if (userExists) {
       throw new BadRequestException('Email is already in use');
@@ -80,11 +78,16 @@ export class AuthService {
 
     return {
       token: this.signToken(userCreated.id),
-      user: userCreated,
+      email: userCreated.email,
+      firstName: userCreated.firstName,
+      middleName: userCreated.middleName,
+      lastName: userCreated.lastName,
+      phoneNumber: userCreated.phoneNumber,
+      profilePicturePath: userCreated.profilePicturePath,
     };
   }
 
-  public async userLogin(loginInput: LoginInput): Promise<AccessToken> {
+  public async userLogin(loginInput: LoginInput): Promise<UserDTO> {
     const user = await this.userService.findByEmail(loginInput.email);
     if (!user) {
       throw new BadRequestException('Invalid Login');
@@ -101,7 +104,12 @@ export class AuthService {
 
     return {
       token: this.signToken(user.id),
-      user: user,
+      email: user.email,
+      firstName: user.firstName,
+      middleName: user.middleName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber,
+      profilePicturePath: user.profilePicturePath,
     };
   }
 
@@ -197,7 +205,7 @@ export class AuthService {
     return false;
   }
 
-  private signToken(id: number) {
+  public signToken(id: number) {
     const payload: JwtInput = { userId: id };
     return this.jwt.sign(payload);
   }

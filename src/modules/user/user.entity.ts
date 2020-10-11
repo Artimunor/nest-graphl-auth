@@ -38,7 +38,19 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   profilePicturePath: string;
 
-  @Column()
+  @Column({ nullable: true })
+  googleToken: string;
+
+  @Column({ nullable: true })
+  googleRefreshToken: string;
+
+  @Column({ nullable: true })
+  linkedInToken: string;
+
+  @Column({ nullable: true })
+  linkedInRefreshToken: string;
+
+  @Column({ nullable: true })
   password: string;
 
   @Column('bool', { default: false })

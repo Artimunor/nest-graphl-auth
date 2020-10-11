@@ -16,7 +16,7 @@ export class MailerConfigService implements MailerOptionsFactory {
         )} <${this.configService.get('EMAIL_FROM')}>`,
       },
       template: {
-        dir: __dirname + '/templates',
+        dir: __dirname + '/../templates',
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

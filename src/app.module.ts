@@ -12,6 +12,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { MailerConfigService } from './config/mailer.config';
 import { RoleModule } from './modules/role/role.module';
+import { AuthController } from './modules/auth/auth.controller';
+import { MulterModule } from '@nestjs/platform-express/multer/multer.module';
+import { MulterConfigService } from './config/multer.config';
 
 @Module({
   imports: [
@@ -29,7 +32,11 @@ import { RoleModule } from './modules/role/role.module';
     MailerModule.forRootAsync({
       useClass: MailerConfigService,
     }),
+    MulterModule.registerAsync({
+      useClass: MulterConfigService,
+    }),
   ],
+  controllers: [AuthController],
   providers: [
     {
       provide: APP_GUARD,

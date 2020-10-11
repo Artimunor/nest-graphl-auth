@@ -9,11 +9,15 @@ import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/guards/gql.auth.guard';
 import { CurrentUser } from '../../shared/decorators/context.decorators';
 import { Roles } from '../../shared/decorators/roles.decorators';
+import { ConfigService } from '@nestjs/config';
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => User)
 export class UserResolver {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Query(() => User)
   async user(@CurrentUser() user: User): Promise<User> {
@@ -50,16 +54,30 @@ export class UserResolver {
     @Args('picture', { type: () => GraphQLUpload })
     { createReadStream, filename }: FileUpload,
   ): Promise<boolean> {
+    console.log(filename);
+    if (!user) {
+    }
     const writeResult: Promise<boolean> = new Promise(async (resolve, reject) =>
       createReadStream()
-        .pipe(createWriteStream(__dirname + `/images/${filename}`))
+        .pipe(
+          createWriteStream(
+            `./${this.configService.get('MULTER_DEST')}/${filename}`,
+          ),
+        )
         .on('finish', () => resolve(true))
         .on('error', () => reject(false)),
     );
+    console.log(`./${this.configService.get('MULTER_DEST')}/${filename}`);
+    const url =
+      `http://${this.configService.get('SERVER_HOST')}:` +
+      this.configService.get('SERVER_PORT') +
+      `/avatar/${filename}`;
 
     this.userService.userUpdate(user.id, {
-      profilePicturePath: `/images/${filename}`,
+      profilePicturePath: url,
     });
+
+    console.log(url);
     return writeResult;
   }
 

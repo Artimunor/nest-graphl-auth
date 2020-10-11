@@ -9,6 +9,10 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { GqlAuthGuard } from './guards/gql.auth.guard';
 import { JwtConfigService } from '../../config/jwt.config';
+import { AuthController } from './auth.controller';
+import { LinkedInStrategy } from './strategy/linkedin.strategy';
+import { GoogleStrategy } from './strategy/google.strategy';
+import { AvatarController } from './avatar.controller';
 
 @Module({
   imports: [
@@ -20,7 +24,16 @@ import { JwtConfigService } from '../../config/jwt.config';
       useClass: JwtConfigService,
     }),
   ],
-  providers: [AuthResolver, AuthService, GqlAuthGuard, JwtStrategy],
+  providers: [
+    AuthController,
+    AvatarController,
+    AuthResolver,
+    AuthService,
+    GqlAuthGuard,
+    JwtStrategy,
+    GoogleStrategy,
+    LinkedInStrategy,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
